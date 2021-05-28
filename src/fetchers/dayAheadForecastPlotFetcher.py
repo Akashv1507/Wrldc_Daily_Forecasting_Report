@@ -92,13 +92,13 @@ class ForecastedDemandFetchForPlotRepo():
             print('error while creating a connection', err)
         else:
             try:
+                fetch_sql = f"SELECT time_stamp, forecasted_demand_value FROM {forecastRevTableName} WHERE time_stamp BETWEEN TO_DATE(:start_time,'YYYY-MM-DD HH24:MI:SS') and TO_DATE(:end_time,'YYYY-MM-DD HH24:MI:SS') and entity_tag=:entityTag and revision_no =:revNo ORDER BY time_stamp"
                 cur = connection.cursor()
+                cur.execute("ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD HH24:MI:SS' ")
+                # fetching data from database and plotting for each enitity
                 for entityObj in listOfEntityObj:
-                    fetch_sql = f"SELECT time_stamp, forecasted_demand_value FROM {forecastRevTableName} WHERE time_stamp BETWEEN TO_DATE(:start_time,'YYYY-MM-DD HH24:MI:SS') and TO_DATE(:end_time,'YYYY-MM-DD HH24:MI:SS') and entity_tag=:entityTag and revision_no = 'R0A' ORDER BY entity_tag, time_stamp"
-                    cur.execute(
-                        "ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD HH24:MI:SS' ")
                     forecastedDemandDf = pd.read_sql(fetch_sql, params={
-                        'start_time': start_time_value, 'end_time': end_time_value,'entityTag': entityObj['tag']}, con=connection)
+                        'start_time': start_time_value, 'end_time': end_time_value,'entityTag': entityObj['tag'], 'revNo': 'R0A'}, con=connection)
                     self.plotGraph(forecastedDemandDf, entityObj)
             except Exception as err:
                 print('error while creating a cursor/plotting graph', err)
