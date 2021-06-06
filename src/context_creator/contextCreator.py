@@ -1,55 +1,51 @@
 import datetime as dt
+import os
 from typing import List, Tuple
+from src.typeDefs.mapeRmseContext import IRmseMapeDetails
+from docxtpl import InlineImage, DocxTemplate
+from docx.shared import Mm
 
 class ContextCreator():
     """class that creates context for template 
     """    
 
-    def __init__(self,year :int,weekNo :int, startDate: dt.datetime, endDate: dt.datetime):
-        """constructor method
-
-        Args:
-            year (int): year
-            weekNo (int): week no
-            startDate (dt.datetime): start date
-            endDate (dt.datetime): end date
-        """        
-        self.year=year
-        self.weekNo = weekNo
-        self.startDate = startDate.strftime("%Y-%m-%d")
-        self.endDate =  endDate.strftime("%Y-%m-%d")
-    
-    def contextCreator(self,rowsFreqProfile:List[dict],weeklyFDI:int,rows400Kv:List[dict], rows765Kv:List[dict],voltValuesTable1:List[dict],voltValuesTable2:List[dict],voltValuesTable3:List[dict],voltValuesTable4:List[dict]) -> dict:
-        """create context for template
-
-        Args:
-            rowsFreqProfile (List[dict]): rows in form of dictionary 
-            weeklyFDI (int)             : weekly FDI
-            rows400Kv (List[dict])      : rows that belongs to 400Kv nodes     
-            rows765Kv (List[dict])      : rows that belongs to 765Kv nodes 
-            voltValuesTable1 (List[dict]): derived voltage value for table 1 in report template.
-            voltValuesTable2 (List[dict]): derived voltage value for table 2 in report template.
-            voltValuesTable3 (List[dict]): derived voltage value for table 3 in report template.
-            voltValuesTable4 (List[dict]): derived voltage value for table 4 in report template.
-
-        Returns:
-            dict: context dictionary that we render in template.
-
-            """          
-       
-        context = {
-                  'year_str' : self.year,
-                  'week_no'  : self.weekNo,
-                  'start_dt' : self.startDate,
-                  'end_dt'   : self.endDate,
-                  'weekVDI'  : "{:0.2f}".format(weeklyFDI),
-                  'derFreqList' : rowsFreqProfile,
-                  'rows400Kv' : rows400Kv,
-                  'rows765Kv'  : rows765Kv,
-                  'voltTable1' : voltValuesTable1,
-                  'voltTable2' : voltValuesTable2,
-                  'voltTable3' : voltValuesTable3,
-                  'voltTable4' : voltValuesTable4        
-        }
+    def __init__(self, plotsDumpPath:str, targetReportDate:dt.datetime, dminus2Date:dt.datetime):
+        self.plotsDumpPath = plotsDumpPath
+        self.targetReportDate = targetReportDate
+        self.dminus2Date = dminus2Date      
         
-        return context
+    
+    def createReportContext(self,rmseMapeContextDict:IRmseMapeDetails, modelName:str, configDict: dict, docTpl ) -> dict:
+
+        
+
+        r0aPlotList = []
+        r16PlotList = []
+
+        listOfEntity = [{'tag': 'WRLDCMP.SCADA1.A0047000', 'name': 'WR'},
+                           {'tag': 'WRLDCMP.SCADA1.A0046980', 'name': 'Maharashtra'},
+                           {'tag': 'WRLDCMP.SCADA1.A0046957', 'name': 'Gujarat'},
+                           {'tag': 'WRLDCMP.SCADA1.A0046978', 'name': 'Madhya Pradesh'},
+                           {'tag': 'WRLDCMP.SCADA1.A0046945', 'name': 'Chattisgarh'},
+                           {'tag': 'WRLDCMP.SCADA1.A0046962', 'name': 'Goa'},
+                           {'tag': 'WRLDCMP.SCADA1.A0046948', 'name': 'DD'}, 
+                           {'tag': 'WRLDCMP.SCADA1.A0046953', 'name': 'DNH'}]
+
+        for entity in listOfEntity:
+            imgPathR0a = os.path.join(self.plotsDumpPath,f"R0A_{modelName}_{self.targetReportDate}_{entity['name']}.png" )
+            imgPathR16 = os.path.join(self.plotsDumpPath,f"R16_{modelName}_{self.dminus2Date}_{entity['name']}.png" )
+            imageR0a = InlineImage(docTpl, image_descriptor=imgPathR0a, width=Mm(205), height=Mm(180))
+            imageR16 = InlineImage(docTpl, image_descriptor=imgPathR16, width=Mm(205), height=Mm(180))
+            r0aPlotList.append(imageR0a)
+            r16PlotList.append(imageR16)
+            
+        reportContext = {
+            'mae':rmseMapeContextDict['mapeContextDict'] ,
+            'rmse':rmseMapeContextDict['rmseContextDict'] ,
+            'r0aPlots': r0aPlotList,
+            'r16Plots': r16PlotList,
+            'targetDate': f"{self.targetReportDate.strftime('%d-%B-%Y')} ({self.targetReportDate.strftime('%A')}) " ,
+            'dminus2Date': f"{self.dminus2Date.strftime('%d-%B-%Y')} ({self.dminus2Date.strftime('%A')})"
+        }       
+        return reportContext  
+        

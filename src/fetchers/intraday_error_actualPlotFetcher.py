@@ -26,11 +26,11 @@ class IntradayErrorActualDemandFetchForPlotRepo():
         Args:
             plotDf (pd.DataFrame):plot df columns ->['ACTUAL_DEMAND', 'R0A_FORECAST', 'R16_FORECAST', 'PERCENTAGE_MW_ERROR']
             entityObj (dict): [{'tag': 'WRLDCMP.SCADA1.A0047000', 'name': 'WR'}]
-        """        
-        
-        if not plotDf.empty:           
+        """    
+        # checking plotdf is not empty as weel as any columns not null    
+        if (not plotDf.empty) and (not plotDf['R0A_FORECAST'].isnull().values.any()):         
             constituentName = entityObj['name']
-            fig, ax = plt.subplots(figsize=(12, 6))
+            fig, ax = plt.subplots(figsize=(8, 6))
 
             actualDemandLine, = ax.plot(plotDf.index.values , plotDf['ACTUAL_DEMAND'] , color='green', linewidth=3.0)
             actualDemandLine.set_label("Actual Load")
@@ -45,8 +45,8 @@ class IntradayErrorActualDemandFetchForPlotRepo():
            
             # setting label and title
             ax.set_title(label= f'{constituentName} Load Forecast Vs Actual For {self.reportDate}', fontdict={'fontsize': '14','fontweight' :'bold'})
-            ax.set_ylabel('-Forecast/Actual(MW)-', fontdict={'fontsize': '12','fontweight' :'bold'})
-            ax_twin.set_ylabel('-Error (%)-', fontdict={'fontsize': '12','fontweight' :'bold'})
+            ax.set_ylabel('-Forecast/Actual(MW)-', fontdict={'fontsize': '10','fontweight' :'bold'})
+            ax_twin.set_ylabel('-Error (%)-', fontdict={'fontsize': '10','fontweight' :'bold'})
             ax.set_xlabel('-Time-', fontdict={'fontsize': '12','fontweight' :'bold'})
             
             # setting x limit
@@ -62,7 +62,8 @@ class IntradayErrorActualDemandFetchForPlotRepo():
 
             # configuring ticks size, rotation and ticks label
             ax.tick_params(axis='x',labelrotation=90, labelsize=9, pad=1,colors='black',length=3, width=5)
-            ax.tick_params(axis='y', labelsize=10, colors='black',length=5, width=5) 
+            ax.tick_params(axis='y', labelsize=10, pad=0, colors='black',length=2, width=5) 
+            ax_twin.tick_params(axis='y', labelsize=10, pad=0, colors='black',length=2, width=5)
 
             # ask matplotlib for the plotted objects and their labels, and combining legends
             lines, labels = ax.get_legend_handles_labels()
@@ -71,7 +72,7 @@ class IntradayErrorActualDemandFetchForPlotRepo():
 
             # showing grid, legend and finally saving
             ax.grid(axis='y')
-            fig.savefig(f'plots_dumps/R16_{self.modelName}_{self.reportDate}_{constituentName}.png')
+            fig.savefig(f'plots_dumps/R16_{self.modelName}_{self.reportDate}_{constituentName}.png', bbox_inches='tight')
      
     def fetchForecastedDemand(self, startDate: dt.datetime, endDate: dt.datetime):
         """fetch intraday forecasted demand, blockwise error, actual demand, day ahead forecast and plot a graph

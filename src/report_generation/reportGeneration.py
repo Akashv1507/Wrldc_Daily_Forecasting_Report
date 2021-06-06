@@ -1,14 +1,17 @@
 
 from src.context_creator.contextCreator import ContextCreator
 import datetime as dt
-from typing import List, Tuple
 from docxtpl import DocxTemplate
 from src.fetchers.dayAheadForecastPlotFetcher import ForecastedDemandFetchForPlotRepo
 from src.fetchers.intraday_error_actualPlotFetcher import IntradayErrorActualDemandFetchForPlotRepo
+from src.fetchers.rmseMapeFetchers import RevisionwiseRmseMapeFetchRepo
+from src.typeDefs.mapeRmseContext import  IRmseMapeDetails
+from src.context_creator.contextCreator import ContextCreator
+
 
 
 def generateReport(targetReportDate: dt.datetime, modelName: str, configDict: dict) -> None:
-    """function that generate weekly Mis Report
+    """function that generate daily forecasting Report
 
     Args:
         targetReportDate (dt.datetime):Target Date of Forecasting Report
@@ -18,18 +21,23 @@ def generateReport(targetReportDate: dt.datetime, modelName: str, configDict: di
 
     con_string = configDict['con_string_mis_warehouse']
     dminus2Date = targetReportDate- dt.timedelta(days=2)
+    plotsDumpPath = configDict['plots_dumps_path']
+
+    # initialization regarding tempalte
+    definedTemplatePath = configDict['raw_template_path'] + '\\forecasting_report_raw_template1.docx'
+    templateSavePath = configDict['report_dumps_path'] + f"\\WR Day Ahead Load Forecast for {targetReportDate.date()} and Comparison for {dminus2Date.date()}.docx"
+    docTpl = DocxTemplate(definedTemplatePath)
 
     # creating instance of each classes
-    # obj_dictMerger = ContextCreator(year, week_number, startDate, endDate)
-    obj_fetchR0aForecast = ForecastedDemandFetchForPlotRepo(con_string, targetReportDate.date(), modelName)
-    obj_fetchR16ErrorForecast = IntradayErrorActualDemandFetchForPlotRepo(con_string, dminus2Date.date(), modelName)
+    obj_contextCreator = ContextCreator(plotsDumpPath, targetReportDate.date(), dminus2Date.date())
+    objPlot_fetchR0aForecast = ForecastedDemandFetchForPlotRepo(con_string, targetReportDate.date(), modelName)
+    objPlot_fetchR16ErrorForecast = IntradayErrorActualDemandFetchForPlotRepo(con_string, dminus2Date.date(), modelName)
+    obj_fetchRmseMape = RevisionwiseRmseMapeFetchRepo(con_string, modelName)
 
-    # obj_fetchR0aForecast.fetchForecastedDemand(targetReportDate, targetReportDate)
-    obj_fetchR16ErrorForecast.fetchForecastedDemand(dminus2Date, dminus2Date)
-    # definedTemplatePath = configDict['template_path'] + \
-    #     '\\freq_volt_profile_raw_template.docx'
-    # templateSavePath = configDict['template_path'] + \
-    #     '\\07-- sept-2020_weekly-report.docx'
-    # doc = DocxTemplate(definedTemplatePath)
-    # doc.render(context)
-    # doc.save(templateSavePath)
+    objPlot_fetchR0aForecast.fetchForecastedDemand(targetReportDate, targetReportDate)
+    objPlot_fetchR16ErrorForecast.fetchForecastedDemand(dminus2Date, dminus2Date)
+    rmseMapeContextDict:IRmseMapeDetails = obj_fetchRmseMape.fetchRevisionwiseRmseMapeError(dminus2Date, dminus2Date)
+    reportContext = obj_contextCreator.createReportContext(rmseMapeContextDict, modelName, configDict, docTpl)
+
+    docTpl.render(reportContext)
+    docTpl.save(templateSavePath)

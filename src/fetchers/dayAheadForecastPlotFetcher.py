@@ -15,6 +15,8 @@ class ForecastedDemandFetchForPlotRepo():
         """initialize connection string
         Args:
             con_string ([type]): connection string 
+            modelName : Name of forecasting model
+            reportDate : Published report date
         """
         self.connString = con_string
         self.reportDate =reportDate
@@ -30,12 +32,12 @@ class ForecastedDemandFetchForPlotRepo():
         
         if not forecastedDemandDf.empty:           
             constituentName = entityObj['name']
-            fig, ax = plt.subplots(figsize=(12, 6))
+            fig, ax = plt.subplots(figsize=(8, 6))
             line, = ax.plot(forecastedDemandDf['TIME_STAMP'] , forecastedDemandDf['FORECASTED_DEMAND_VALUE'] , color='red', linewidth=3.0)
             
             # setting label and title
             ax.set_title(label= f'{constituentName} Day Ahead Load Forecast For {self.reportDate}', fontdict={'fontsize': '14','fontweight' :'bold'})
-            ax.set_ylabel('-Forecast(MW)-', fontdict={'fontsize': '12','fontweight' :'bold'})
+            ax.set_ylabel('-Forecast(MW)-', fontdict={'fontsize': '10','fontweight' :'bold'})
             ax.set_xlabel('-Time-', fontdict={'fontsize': '12','fontweight' :'bold'})
             line.set_label("Day Ahead Forecast(R0)")
            
@@ -47,13 +49,15 @@ class ForecastedDemandFetchForPlotRepo():
             ax.xaxis.set_major_locator(mdates.HourLocator(interval=1))
 
             # configuring ticks size, rotation and ticks label
-            ax.tick_params(axis='x',labelrotation=90, labelsize=9, pad=1,colors='black',length=3, width=5)
-            ax.tick_params(axis='y', labelsize=10, colors='black',length=5, width=5) 
+            ax.tick_params(axis='x',labelrotation=90, labelsize=9, pad=1,colors='black',length=5, width=5)
+            ax.tick_params(axis='y', labelsize=9, colors='black', pad=1, length=3, width=6) 
+
+            ax.get_yaxis().set_visible(True)
 
             # showing grid, legend and finally saving
             ax.grid(axis='y')
             ax.legend()
-            fig.savefig(f'plots_dumps/{self.modelName}_{self.reportDate}_{constituentName}.png')
+            fig.savefig(f'plots_dumps/R0A_{self.modelName}_{self.reportDate}_{constituentName}.png', bbox_inches='tight')
      
     def fetchForecastedDemand(self, startDate: dt.datetime, endDate: dt.datetime):
         """fetch forecasted demand of R0A
