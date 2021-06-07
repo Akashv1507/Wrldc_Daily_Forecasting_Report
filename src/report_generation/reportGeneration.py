@@ -7,6 +7,7 @@ from src.fetchers.intraday_error_actualPlotFetcher import IntradayErrorActualDem
 from src.fetchers.rmseMapeFetchers import RevisionwiseRmseMapeFetchRepo
 from src.typeDefs.mapeRmseContext import  IRmseMapeDetails
 from src.context_creator.contextCreator import ContextCreator
+from src.fetchers.intradayForVsActualFetcher import IntradayForecastVsActualFetchRepository
 
 
 
@@ -24,8 +25,8 @@ def generateReport(targetReportDate: dt.datetime, modelName: str, configDict: di
     plotsDumpPath = configDict['plots_dumps_path']
 
     # initialization regarding tempalte
-    definedTemplatePath = configDict['raw_template_path'] + '\\forecasting_report_raw_template1.docx'
-    templateSavePath = configDict['report_dumps_path'] + f"\\WR Day Ahead Load Forecast for {targetReportDate.date()} and Comparison for {dminus2Date.date()}.docx"
+    definedTemplatePath = configDict['raw_template_path'] + '\\forecasting_report_raw_template.docx'
+    templateSavePath = configDict['report_dumps_path'] + f"\\{modelName.upper()} WR Day Ahead Load Forecast for {targetReportDate.date()} and Comparison for {dminus2Date.date()}.docx"
     docTpl = DocxTemplate(definedTemplatePath)
 
     # creating instance of each classes
@@ -33,11 +34,13 @@ def generateReport(targetReportDate: dt.datetime, modelName: str, configDict: di
     objPlot_fetchR0aForecast = ForecastedDemandFetchForPlotRepo(con_string, targetReportDate.date(), modelName)
     objPlot_fetchR16ErrorForecast = IntradayErrorActualDemandFetchForPlotRepo(con_string, dminus2Date.date(), modelName)
     obj_fetchRmseMape = RevisionwiseRmseMapeFetchRepo(con_string, modelName)
+    obj_fetchIntVsActual = IntradayForecastVsActualFetchRepository(con_string, modelName)
 
     objPlot_fetchR0aForecast.fetchForecastedDemand(targetReportDate, targetReportDate)
     objPlot_fetchR16ErrorForecast.fetchForecastedDemand(dminus2Date, dminus2Date)
     rmseMapeContextDict:IRmseMapeDetails = obj_fetchRmseMape.fetchRevisionwiseRmseMapeError(dminus2Date, dminus2Date)
-    reportContext = obj_contextCreator.createReportContext(rmseMapeContextDict, modelName, configDict, docTpl)
+    foreVsActContext =obj_fetchIntVsActual.fetchForVsActualData(dminus2Date, dminus2Date)
+    reportContext = obj_contextCreator.createReportContext(rmseMapeContextDict, foreVsActContext, modelName, configDict, docTpl)
 
     docTpl.render(reportContext)
     docTpl.save(templateSavePath)

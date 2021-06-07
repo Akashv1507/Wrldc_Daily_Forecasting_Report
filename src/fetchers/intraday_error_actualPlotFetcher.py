@@ -28,7 +28,7 @@ class IntradayErrorActualDemandFetchForPlotRepo():
             entityObj (dict): [{'tag': 'WRLDCMP.SCADA1.A0047000', 'name': 'WR'}]
         """    
         # checking plotdf is not empty as weel as any columns not null    
-        if (not plotDf.empty) and (not plotDf['R0A_FORECAST'].isnull().values.any()):         
+        if (not plotDf.empty) and (not plotDf['R0A_FORECAST'].isnull().values.any()):        
             constituentName = entityObj['name']
             fig, ax = plt.subplots(figsize=(8, 6))
 

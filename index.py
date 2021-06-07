@@ -17,12 +17,14 @@ parser.add_argument(
 
 args = parser.parse_args()
 targetReportDate = dt.strptime(args.report_date, '%Y-%m-%d')
-modelName = args.model_name
+modelName = args.model_name.lower()
 
 targetReportDate = targetReportDate.replace(
     hour=0, minute=0, second=0, microsecond=0)
 
 print('targetReportDate = {0}'.format(dt.strftime(
     targetReportDate, '%Y-%m-%d')), modelName)
-
-generateReport(targetReportDate, modelName, configDict)
+if modelName in ['dfm1','dfm2','dfm3', 'dfm4']:
+    generateReport(targetReportDate, modelName, configDict)
+else:
+    print(f"{modelName} is not a valid model name")
