@@ -7,7 +7,6 @@ apiIndex.py
 scadaApiFetcher.py
 demo.bat
 demoBatch.py
-venv/
 config.xlsx
 data_files/
 apiIndex.py
