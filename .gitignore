@@ -1,4 +1,4 @@
-venv/
+report_dumps/*.docx
 config.json
 .vscode
 config.xlsx
@@ -26,6 +26,7 @@ __pycache__
 *.py[cod]
 *$py.class
 ~*.xlsx
+
 *.png
 .VSCodeCounter
 # Distribution / packaging 
