@@ -1,9 +1,9 @@
 import argparse
 from datetime import datetime as dt, timedelta
-from src.appConfig import getAppConfigDict
+from src.appConfig import loadAppConfig
 from src.report_generation.reportGeneration import generateReport
 
-configDict = getAppConfigDict()
+configDict = loadAppConfig()
 
 targetReportDate = dt.now() + timedelta(days=1)
 modelName = "dfm1"
