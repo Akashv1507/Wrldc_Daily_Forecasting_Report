@@ -1,4 +1,5 @@
 report_dumps/*.docx
+plots_dumps/*.png
 config.json
 .vscode
 config.xlsx
