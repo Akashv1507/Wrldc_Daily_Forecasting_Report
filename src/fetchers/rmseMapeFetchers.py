@@ -54,7 +54,7 @@ class RevisionwiseRmseMapeFetchRepo():
             mapeContextDict:IMapeDetails={'colNames': colName, 'tblContents':[r0aErrorRow, r0aErrorPercentageRow, r16ErrorRow, r16ErrorPercentageRow]}
             self.dataDict['mapeContextDict'] = mapeContextDict
         else:
-            rmseContextDict:IRmseMapeDetails={'colNames': colName, 'tblContents':[r0aErrorRow, r0aErrorPercentageRow, r16ErrorRow, r16ErrorPercentageRow]}
+            rmseContextDict:IRmseDetails={'colNames': colName, 'tblContents':[r0aErrorRow, r0aErrorPercentageRow, r16ErrorRow, r16ErrorPercentageRow]}
             self.dataDict['rmseContextDict'] = rmseContextDict
         
 

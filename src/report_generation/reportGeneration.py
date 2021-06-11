@@ -6,8 +6,10 @@ from src.fetchers.dayAheadForecastPlotFetcher import ForecastedDemandFetchForPlo
 from src.fetchers.intraday_error_actualPlotFetcher import IntradayErrorActualDemandFetchForPlotRepo
 from src.fetchers.rmseMapeFetchers import RevisionwiseRmseMapeFetchRepo
 from src.typeDefs.mapeRmseContext import  IRmseMapeDetails
+from src.typeDefs.r16MaxMinAvgStats import IR16MaxMinAvgStatsContext
 from src.context_creator.contextCreator import ContextCreator
 from src.fetchers.intradayForVsActualFetcher import IntradayForecastVsActualFetchRepository
+from src.typeDefs.reportContext import IReportContext
 
 
 
@@ -36,11 +38,16 @@ def generateReport(targetReportDate: dt.datetime, modelName: str, configDict: di
     obj_fetchRmseMape = RevisionwiseRmseMapeFetchRepo(con_string, modelName)
     obj_fetchIntVsActual = IntradayForecastVsActualFetchRepository(con_string, modelName)
 
-    objPlot_fetchR0aForecast.fetchForecastedDemand(targetReportDate, targetReportDate)
-    objPlot_fetchR16ErrorForecast.fetchForecastedDemand(dminus2Date, dminus2Date)
-    rmseMapeContextDict:IRmseMapeDetails = obj_fetchRmseMape.fetchRevisionwiseRmseMapeError(dminus2Date, dminus2Date)
-    foreVsActContext =obj_fetchIntVsActual.fetchForVsActualData(dminus2Date, dminus2Date)
-    reportContext = obj_contextCreator.createReportContext(rmseMapeContextDict, foreVsActContext, modelName, configDict, docTpl)
+    try:
+        objPlot_fetchR0aForecast.fetchForecastedDemand(targetReportDate, targetReportDate)
+        objPlot_fetchR16ErrorForecast.fetchForecastedDemand(dminus2Date, dminus2Date)
+        rmseMapeContextDict:IRmseMapeDetails = obj_fetchRmseMape.fetchRevisionwiseRmseMapeError(dminus2Date, dminus2Date)
+        foreVsActContext:IR16MaxMinAvgStatsContext =obj_fetchIntVsActual.fetchForVsActualData(dminus2Date, dminus2Date)
+        reportContext:IReportContext = obj_contextCreator.createReportContext(rmseMapeContextDict, foreVsActContext, modelName, configDict, docTpl)
 
-    docTpl.render(reportContext)
-    docTpl.save(templateSavePath)
+        docTpl.render(reportContext)
+        docTpl.save(templateSavePath)
+        return True
+    except Exception as err :
+        print(err)
+        return False

@@ -2,23 +2,41 @@ import datetime as dt
 import os
 from typing import List, Tuple
 from src.typeDefs.mapeRmseContext import IRmseMapeDetails
+from src.typeDefs.r16MaxMinAvgStats import IR16MaxMinAvgStatsContext
 from docxtpl import InlineImage, DocxTemplate
 from docx.shared import Mm
+from src.typeDefs.reportContext import IReportContext
 
 class ContextCreator():
     """class that creates context for template 
     """    
 
     def __init__(self, plotsDumpPath:str, targetReportDate:dt.datetime, dminus2Date:dt.datetime):
+        """constructor method
+
+        Args:
+            plotsDumpPath (str): [path of plot storage]
+            targetReportDate (dt.datetime): [report date]
+            dminus2Date (dt.datetime): [D-2 date for comparison]
+        """        
         self.plotsDumpPath = plotsDumpPath
         self.targetReportDate = targetReportDate
         self.dminus2Date = dminus2Date      
         
     
-    def createReportContext(self,rmseMapeContextDict:IRmseMapeDetails, foreVsActContext, modelName:str, configDict: dict, docTpl ) -> dict:
+    def createReportContext(self,rmseMapeContextDict:IRmseMapeDetails, foreVsActContext: IR16MaxMinAvgStatsContext, modelName:str, configDict: dict, docTpl ) -> IReportContext:
+        """create/merge report context
 
-        
+        Args:
+            rmseMapeContextDict (IRmseMapeDetails): IRmseMape details
+            foreVsActContext (IR16MaxMinAvgStatsContext): [IR16MaxMinAvgStatsContext]
+            modelName (str): [model name dfm1, dfm2....]
+            configDict (dict): [application config]
+            docTpl ([type]): [template instane]
 
+        Returns:
+            IReportContext: [IReportContext]
+        """        
         r0aPlotList = []
         r16PlotList = []
         # isValid flag checks which entities present in which model
@@ -44,7 +62,7 @@ class ContextCreator():
                 r0aPlotList.append(imageR0a)
                 r16PlotList.append(imageR16)
             
-        reportContext = {
+        reportContext:IReportContext = {
             'mae':rmseMapeContextDict['mapeContextDict'] ,
             'rmse':rmseMapeContextDict['rmseContextDict'] ,
             'foreVsAct' : foreVsActContext,

@@ -1,5 +1,5 @@
 venv/
-
+config.json
 .vscode
 config.xlsx
 data_files/

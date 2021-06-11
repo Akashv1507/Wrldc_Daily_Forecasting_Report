@@ -25,6 +25,10 @@ targetReportDate = targetReportDate.replace(
 print('targetReportDate = {0}'.format(dt.strftime(
     targetReportDate, '%Y-%m-%d')), modelName)
 if modelName in ['dfm1','dfm2','dfm3', 'dfm4']:
-    generateReport(targetReportDate, modelName, configDict)
+    isReportGenerated = generateReport(targetReportDate, modelName, configDict)
+    if isReportGenerated:
+        print(f"Yeah!! report generation successfull for {targetReportDate.date()}")
+    else:
+        print(f"Sorry report generation unsuccessfull for {targetReportDate.date()}")
 else:
     print(f"{modelName} is not a valid model name")
