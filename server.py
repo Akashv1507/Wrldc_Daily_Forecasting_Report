@@ -15,6 +15,9 @@ configDict = loadAppConfig()
 app.config['SECRET_KEY'] = configDict['flaskSecret']
 # app.config['CORS_HEADERS'] = 'Content-Type'
 
+@app.route('/')
+def home():
+    return "This port is used for background service to generate forecasting report."
 
 @app.route('/createForecastingReport',  methods=['POST'])
 # @cross_origin()
